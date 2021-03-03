@@ -59,3 +59,5 @@ Issues and Galaxy Development
 =============================
 
 Please see `CONTRIBUTING.md <CONTRIBUTING.md>`_ .
+
+For notes specific to Muon Galaxy development, see `eli_dev_notes.md <eli_dev_notes.md>`_ .
