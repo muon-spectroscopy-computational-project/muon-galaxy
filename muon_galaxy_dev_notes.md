@@ -7,21 +7,27 @@ rename it to `galaxy.yml`, otherwise `run.sh` won't work.
 
 ### Installing in Docker container
 
-I initially tried to install Galaxy in a Docker container on my local machine. My local machine is
+I tried to install Galaxy in a Docker container on my local machine. My local machine is
 Windows 10 and the Docker container was based off the `python:3` image on Docker Hub (which uses
-Linux). I mounted my local copy of `muon-galaxy` as a volume on the container rather than cloning
-the repo fresh - which meant I had to be careful about my
-[Git config for line endings](https://docs.github.com/en/github-ae@latest/github/using-git/configuring-git-to-handle-line-endings)
-(bash scripts in particular need to have LF or they won't run on Linux containers).
+Linux).
 
-For reasons unknown, the Galaxy installation ran extremely slowly in this container. The NPM build
+Initially, I mounted my local copy of `muon-galaxy` as a volume on the container rather than cloning
+the repo fresh. This turned out to be a mistake for 2 reasons:
+* I had to be careful about my
+[Git config for line endings](https://docs.github.com/en/github-ae@latest/github/using-git/configuring-git-to-handle-line-endings)
+(bash scripts in particular need to have LF or they won't run on Linux containers)
+* None of the symbolic links worked
+With this setup, the Galaxy installation ran extremely slowly in the container. The NPM plugin build
 alone took 39 minutes, and compiling the client took so long that the process ran out of heap
 memory (which is limited to ~1GB by default). Starting from a fresh container it took the `run.sh`
 script over 1.5 hours to reach this failure point. The build absolutely should not take this long.
+I believe the problem was with the symbolic links not working, as Galaxy relies heavily on these.
+
+Cloning the repository directly onto the container avoided the issues above, and installation
+subsequently only took about ten minutes – though the client build did still run out of heap memory.
 
 After increasing the heap memory available to Node using
-`export NODE_OPTIONS= --max_old_space_size=4096`, the build was eventually successful. I ended up
-running `make client-watch`, then `make client`, before running `run.sh` again.
+`export NODE_OPTIONS=--max_old_space_size=2048`, the build was eventually successful.
 
 I also had to change my config file so that `uwsgi` listened to `0.0.0.0:8080` rather than the
 default `127.0.0.1:8080`. This is because Docker Desktop for Windows listens to the `0.0.0.0` IP on
