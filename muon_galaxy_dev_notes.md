@@ -2,9 +2,6 @@
 
 ## Galaxy Installation
 
-Make sure to copy a sample config file from `lib/galaxy/config/` into the root `config/` folder and
-rename it to `galaxy.yml`, otherwise `run.sh` won't work.
-
 ### Installing in Docker container
 
 I tried to install Galaxy in a Docker container on my local machine. My local machine is
