@@ -673,6 +673,61 @@ class PQR(GenericMolFile):
             dataset.blurb = 'file purged from disk'
 
 
+
+@build_sniff_from_prefix
+class CIF(GenericMolFile):
+    """
+    Crystallographic Information File format.
+    https://www.iucr.org/resources/cif/spec/version1.1
+    """
+    file_ext = "cif"
+
+    def sniff_prefix(self, file_prefix):
+        """
+        Try to guess if the file is a CIF file.
+
+        >>> from galaxy.datatypes.sniff import get_test_fname
+        >>> fname = get_test_fname('Si.cif')
+        >>> CIF().sniff(fname)
+        True
+        >>> fname = get_test_fname('drugbank_drugs.cml')
+        >>> CIF().sniff(fname)
+        False
+        """
+        # TODO build proper sniffer. Below is PDB example
+        headers = iter_headers(file_prefix, sep=' ', count=300)
+        h = t = c = s = k = e = False
+        for line in headers:
+            section_name = line[0].strip()
+            if section_name == 'HEADER':
+                h = True
+            elif section_name == 'TITLE':
+                t = True
+            elif section_name == 'COMPND':
+                c = True
+            elif section_name == 'SOURCE':
+                s = True
+            elif section_name == 'KEYWDS':
+                k = True
+            elif section_name == 'EXPDTA':
+                e = True
+
+        if h * t * c * s * k * e:
+            return True
+        else:
+            return False
+
+    def set_peek(self, dataset, is_multi_byte=False):
+        if not dataset.dataset.purged:
+            atom_numbers = count_special_lines("^ATOM", dataset.file_name)
+            hetatm_numbers = count_special_lines("^HETATM", dataset.file_name)
+            dataset.peek = get_file_peek(dataset.file_name)
+            dataset.blurb = f"info goes here"
+        else:
+            dataset.peek = 'file does not exist'
+            dataset.blurb = 'file purged from disk'
+
+
 class grd(Text):
     file_ext = "grd"
 
