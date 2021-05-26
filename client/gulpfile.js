@@ -13,6 +13,7 @@ const glob = require("glob");
 const PLUGIN_BUILD_IDS = [
     "annotate_image",
     "chiraviz",
+    "crystvis",
     "editor",
     "heatmap/heatmap_default",
     "hyphyvision",
