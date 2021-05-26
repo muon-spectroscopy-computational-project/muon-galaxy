@@ -15,6 +15,7 @@ const STATIC_PLUGIN_BUILD_IDS = [
     "chiraviz",
     "cytoscape",
     "drawrna",
+    "crystvis",
     "editor",
     "example",
     "heatmap/heatmap_default",
