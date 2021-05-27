@@ -12,7 +12,7 @@ If running on a fresh Cloud VM, see [my detailed Galaxy installation notes](http
 
 ### Muon Galaxy
 
-The Galaxy Git project is big. A standard `git clone` operation will give you a 634 MB folder, mostly of Git history. Below are some options to change the size of the download:
+The Galaxy Git project is big. A standard `git clone https://github.com/muon-spectroscopy-computational-project/muon-galaxy/` operation will give you a 634 MB folder, mostly of Git history. Below are some options to change the size of the download:
 
 | Command                                            | Size   |
 | -------------------------------------------------- | ------ |
@@ -24,7 +24,7 @@ However, most of the folder bulk comes from the Galaxy installation and build.
 
 ### Muon Galaxy Tools
 
-Clone this repo and checkout the `eli/add-pm-muairss` branch. Keep this separate from the main Galaxy repo.
+Clone the repo and checkout the `eli/add-pm-muairss` branch. Keep this separate from the main Galaxy repo.
 ```
 git clone --branch eli/add-pm-muairss https://github.com/muon-spectroscopy-computational-project/muon-galaxy-tools
 ```
