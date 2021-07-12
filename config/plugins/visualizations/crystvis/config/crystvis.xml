@@ -12,13 +12,25 @@
     <params>
         <param type="dataset" var_name_in_template="hda" required="true">dataset_id</param>
     </params>
-    <entry_point entry_point_type="chart" src="script.js"/>
+    <entry_point entry_point_type="chart" src="crystvis.js"/>
     <settings>
         <input>
-            <name>data_dialog</name>
-            <label>Some data selector</label>
-            <type>data_dialog</type>
-            <multiple>false</multiple>
+            <label>Atom Labels</label>
+            <name>atom_labels</name>
+            <help>Display the atomic symbol of each atom</help>
+            <type>select</type>
+            <display>radio</display>
+            <value>off</value>
+            <data>
+                <data>
+                    <label>On</label>
+                    <value>on</value>
+                </data>
+                <data>
+                    <label>Off</label>
+                    <value>off</value>
+                </data>
+            </data>
         </input>
     </settings>
 </visualization>

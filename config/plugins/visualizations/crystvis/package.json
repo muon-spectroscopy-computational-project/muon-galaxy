@@ -17,6 +17,6 @@
         "underscore": "^1.8.3"
     },
     "scripts": {
-        "build": "parcel build src/script.js -d static"
+        "build": "parcel build src/crystvis.js -d static"
     }
 }
