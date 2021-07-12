@@ -16,6 +16,10 @@ _.extend(window.bundleEntries || {}, {
                 console.log(response)
                 var name = options.dataset.name;
                 var ext = options.dataset.file_ext;
+                var settings = options.chart.settings;
+                var representation_parameters = {
+                    atom_labels: settings.get("atom_labels"),
+                };
                 var loaded = visualiser.loadModels(response, ext, name);
                 console.log(loaded);
                 visualiser.displayModel(loaded[0]);
@@ -23,9 +27,19 @@ _.extend(window.bundleEntries || {}, {
                 visualiser.displayed = visualiser.model.find({
                     'all': []
                 });
+                setParameters(visualiser, representation_parameters);
                 options.chart.state('ok', 'testing');
                 options.process.resolve();
             }
         });
     }
 });
+
+function setParameters(visualiser, parameters) {
+    if (parameters["atom_labels"] == "on") {
+        visualiser.displayed.addLabels();
+    }
+    else {
+        visualiser.displayed.removeLabels();
+    }
+};
