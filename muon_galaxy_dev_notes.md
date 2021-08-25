@@ -33,7 +33,8 @@ the container by default when publishing ports (at least on my machine).
 ### Installing on Cloud VM
 
 On a fresh VM, you will need to install `git`, `python3` and `bzip2` before cloning the repository
-or running `run.sh`.
+or running `run.sh`. Galaxy supports Python 3.6+, but Python 3.8+ is useful for tool development
+(see next section).
 
 If using the 'Remote – SSH' VS Code extension to develop on the VM, you should make a couple of
 settings changes before running `run.sh`:
@@ -56,3 +57,39 @@ page for more info.
 
 I found installation on the VM to run pretty quickly – around 10 minutes to complete the build and
 start Galaxy. I did not need to increase the heap memory available to Node.
+
+## Tool Development
+
+See the [muon-galaxy-tools documentation](https://github.com/muon-spectroscopy-computational-project/muon-galaxy-tools#readme).
+
+If you use VSCode, the [Galaxy Tools extension](https://marketplace.visualstudio.com/items?itemName=davelopez.galaxy-tools)
+is very useful. It provides code snippets and an interface with Planemo within VSCode. This
+requires Python 3.8 or higher.
+
+I also needed to install `libffi-devel`, `bzip2-devel`, `pysam` and `htslib` to get the extension
+working, but I was installing python 3.9 from source.
+
+## Testing Setup
+
+Most tests should run out of the box, but the Selenium tests for the web interface require some
+additional software.
+
+You will need to install a web driver – either chromedriver or geckodriver – and a corresponding
+browser – either Chrome or Firefox. I chose geckodriver and Firefox.
+
+You can watch the Selenium test operations in real time if you set up X11 forwarding (and you may
+need to do this to get them to run at all). You will need to install `Xvfb` (case sensitive in yum)
+and follow these [instructions for setting up X11 forwarding](https://unix.stackexchange.com/questions/12755/how-to-forward-x-over-ssh-to-run-graphics-applications-remotely).
+You also need to pip install `pyvirtualdisplay`.
+
+If you use VSCode, there are some additional tricks needed to get X11 forwarding to work – running a
+separate SSH terminal (e.g. through Git Bash) and then setting the DISPLAY variable in
+`.vscode/settings.json`:
+```
+"terminal.integrated.env.linux": {
+        "DISPLAY": "<ip or localhost>:10.0"
+    }
+```
+
+See [this VSCode issue](https://github.com/microsoft/vscode-remote-release/issues/267) for more
+information and alternative ways of setting DISPLAY.
