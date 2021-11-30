@@ -1,19 +1,16 @@
 import * as d3 from "d3";
 import * as _ from "underscore";
 import * as crystvis from "crystvis-js";
-
-var Datasets = window.bundleEntries.chartUtilities.Datasets;
+import { request as requestDatasets } from "@galaxyproject/charts/lib/utilities/datasets";
 
 _.extend(window.bundleEntries || {}, {
     load: function (options) {
-        console.log("aa");
-        console.log(options.targets);
-        var visualiser = new crystvis.CrystVis('#' + options.targets[0], 640, 480);
-        console.log("bb");
+        console.debug("targets are:");
+        console.debug(options.target);
+        var visualiser = new crystvis.CrystVis('#' + options.target, 640, 480);
         $.ajax({
             url: options.dataset.download_url,
             success: function (response) {
-                console.log(response)
                 var name = options.dataset.name;
                 var ext = options.dataset.file_ext;
                 var settings = options.chart.settings;
@@ -21,9 +18,11 @@ _.extend(window.bundleEntries || {}, {
                     atom_labels: settings.get("atom_labels"),
                 };
                 var loaded = visualiser.loadModels(response, ext, name);
-                console.log(loaded);
-                visualiser.displayModel(loaded[0]);
-                console.log(visualiser);
+                console.debug("loaded model:");
+                console.debug(loaded);
+                visualiser.displayModel(Object.keys(loaded)[0]);
+                console.debug("visualiser:");
+                console.debug(visualiser);
                 visualiser.displayed = visualiser.model.find({
                     'all': []
                 });
