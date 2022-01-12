@@ -4,9 +4,15 @@ as of 26/05/2021
 
 ## Prerequisites
 
-Galaxy requires UNIX/Linux or Mac OSX, plus Python 3.6. More information in the [Galaxy Install Documentation](https://galaxyproject.org/admin/get-galaxy/).
+Galaxy requires UNIX/Linux (WSL included) or Mac OSX, plus Python 3.6+. More information in the [Galaxy Install Documentation](https://galaxyproject.org/admin/get-galaxy/).
 
-If running on a fresh Cloud VM, see [my detailed Galaxy installation notes](https://github.com/muon-spectroscopy-computational-project/muon-galaxy/blob/eli/dev-documentation/muon_galaxy_dev_notes.md#installing-on-cloud-vm).
+If running on a fresh Cloud VM and not using Ansible, see [my detailed Galaxy installation notes](https://github.com/muon-spectroscopy-computational-project/muon-galaxy/blob/eli/dev-documentation/muon_galaxy_dev_notes.md#installing-on-cloud-vm).
+
+## Ansible
+
+The easiest way to get a Galaxy server running is to use the existing [Muon Galaxy Playbooks](https://github.com/muon-spectroscopy-computational-project/muon-galaxy-playbooks) directed at your local machine. Documentation for this is in that repository.
+
+If you choose to install with Ansible, skip to the [Uploading Data](#uploading-data) section below once the server is running. Otherwise, start at [Downloading Repositories](#downloading-repositories) for a manual install.
 
 ## Downloading Repositories
 
@@ -17,21 +23,21 @@ The Galaxy Git project is big. A standard `git clone` operation will give you a 
 | Command                                            | Size   |
 | -------------------------------------------------- | ------ |
 | `git clone`                                        | 634 MB |
-| `git clone --branch eli/combine-changes --depth 1` | 134 MB |
+| `git clone --branch eli/add-crystvis --depth 1` | 134 MB |
 | Download zip file and extract                      | 92 MB  |
 
 However, most of the folder bulk comes from the Galaxy installation and build.
 
 ### Muon Galaxy Tools
 
-Clone this repo and checkout the `eli/add-pm-muairss` branch. Keep this separate from the main Galaxy repo.
+Clone this repo. Keep this separate from the main Galaxy repo.
 ```
-git clone --branch eli/add-pm-muairss https://github.com/muon-spectroscopy-computational-project/muon-galaxy-tools
+git clone https://github.com/muon-spectroscopy-computational-project/muon-galaxy-tools
 ```
 
 ## Configuring Galaxy
 
-Go into the Galaxy root folder and checkout branch `eli/combine-changes`, which collates all the changes made so far for Muon Galaxy.
+Go into the Galaxy root folder and checkout branch `eli/add-crystvis`, which collates all the changes made so far for Muon Galaxy.
 
 Set up the config files:
 ```bash
@@ -64,6 +70,8 @@ Edit `config/muon_tool_conf.xml`. Add the following content to display the muon 
 <toolbox tool_path="../muon-galaxy-tools">
     <section name="Muon Tools" id="muon">
         <tool file="pm_muairss_write/pm_muairss_write.xml" />
+        <tool file="pm_uep_opt_write/pm_uep_opt_write.xml" />
+        <tool file="pm_muairss_read/pm_muairss_read.xml" />
     </section>
 </toolbox>
 ```
@@ -73,12 +81,15 @@ Edit `config/datatypes_conf.xml` and add the following lines at line 718 (after 
 ```xml=1.0
 <datatype extension="cif" type="galaxy.datatypes.molecules:CIF" display_in_upload="true"/>
 <datatype extension="cell" type="galaxy.datatypes.molecules:Cell" display_in_upload="true"/>
+<datatype extension="xyz" type="galaxy.datatypes.molecules:XYZ" display_in_upload="true"/>
 ```
 Add the following at line 1009 (after "PDB" and before "MOL2"):
 ```xml=1.0
 <sniffer type="galaxy.datatypes.molecules:Cell"/>
+<sniffer type="galaxy.datatypes.molecules:CIF"/>
+<sniffer type="galaxy.datatypes.molecules:XYZ"/>
 ```
-This enables the datatypes and sniffers for `.cif` and `.cell` files (no sniffer for CIF written yet). There is no datatype built for YAML yet so YAML files are treated as text files.
+This enables the datatypes and sniffers for `.cif` and `.cell` files (no sniffer for CIF written yet).
 
 To save 1.3 GB and a bit of time during installation, find and delete everything in the `config/plugins/visualizations` directory except the `crystvis` and `common` subdirectories:
 ```shell
@@ -96,12 +107,10 @@ I tried to investigate reducing the number of dependencies, but didn't get anywh
 
 ## Uploading Data
 
-Add data to Galaxy using the "Upload Data" button. Once loaded, select the correct file type for each datatype ("cif" for `cif`, "cell" for `.cell`, "txt" for `.yaml`). This can be done in the upload dialog or later.
+Add data to Galaxy using the "Upload Data" button. The file type should be automatically detected during upload, but if not, it can be edited later ("cif" for `.cif`, "cell" for `.cell`, "xyz" for `.xyz`).
 
 ## Using the Tools
 
-The "Generate muon structures (pm-muairss)" tool requires a `.cell` file and a `.yaml` file as input, with the `.yaml` file following the format required for pymuon-suite. The third tool parameter, "out_folder," must have a value that matches the `out_folder` parameter in the `.yaml` file (a quirk of incomplete tool development). Example files can be found in the muon-galaxy-tools repo: [Si.cell](https://github.com/muon-spectroscopy-computational-project/muon-galaxy-tools/blob/eli/add-pm-muairss-write/pm_muairss_write/test-data/Si.cell) and [Si-muairss-castep.yaml](https://github.com/muon-spectroscopy-computational-project/muon-galaxy-tools/blob/eli/add-pm-muairss-write/pm_muairss_write/test-data/Si-muairss-castep.yaml) (if using these, the out_folder parameter value should be "si-muon-airss-out").
+The "Generate muon structures (pm-muairss)" tool requires a `.cell` file and a `.yaml` file as input, with the `.yaml` file following the format required for pymuon-suite. Example files can be found in the muon-galaxy-tools repo: [Si.cell](https://github.com/muon-spectroscopy-computational-project/muon-galaxy-tools/blob/eli/add-pm-muairss-write/pm_muairss_write/test-data/Si.cell) and [Si-muairss-castep.yaml](https://github.com/muon-spectroscopy-computational-project/muon-galaxy-tools/blob/eli/add-pm-muairss-write/pm_muairss_write/test-data/Si-muairss-castep.yaml).
 
-To use the visualisation tool, you have to create a login - this is stored locally and will also preserve your Galaxy history when you shut down the server. Once logged in, click "Create Visualization." The [crystvis-js](https://github.com/stur86/crystvis-js) visualiser should be in the list and searchable (it'll be the only option in the list if you deleted everything else earlier). This visualiser requires a `.cif` file as input - an example can be found here: [CHA.cif](https://github.com/stur86/crystvis-js/blob/master/test/data/CHA.cif).
-
-The crystvis-js visualizer currently uses [Eli's fork](https://github.com/elichad/crystvis-js/tree/eli/change-three-dependency) due to a dependency issue.
+To use the visualisation tool, you have to create a login - this is stored locally and will also preserve your Galaxy history when you shut down the server. Once logged in, click "Create Visualization." The [crystvis-js](https://github.com/stur86/crystvis-js) visualiser should be in the list and searchable (it'll be the only option in the list if you deleted everything else earlier). This visualiser requires a `.cif` or `.cell` file as input - an example can be found here: [CHA.cif](https://github.com/stur86/crystvis-js/blob/master/test/data/CHA.cif).
