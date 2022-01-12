@@ -1,6 +1,10 @@
-# Notes on Muon Galaxy development
+# Notes for Muon Galaxy developers
 
 ## Galaxy Installation
+
+### Ansible
+
+Ansible installation isn't particularly suited to a development setup - you're better off with a manual installation you can tweak more easily. If you just want a Galaxy server, though, you can use the Ansible playbooks to set one up. See the [muon-galaxy-playbooks documentation](https://github.com/muon-spectroscopy-computational-project/muon-galaxy-playbooks/blob/main/README.md) for details. 
 
 ### Installing in Docker container
 
