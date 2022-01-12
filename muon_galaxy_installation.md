@@ -1,6 +1,6 @@
 # Installing Muon Galaxy
 
-as of 26/05/2021
+as of 12/01/2022
 
 ## Prerequisites
 
