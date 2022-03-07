@@ -6,7 +6,7 @@ as of 12/01/2022
 
 Galaxy requires UNIX/Linux (WSL included) or Mac OSX, plus Python 3.6+. More information in the [Galaxy Install Documentation](https://galaxyproject.org/admin/get-galaxy/).
 
-If running on a fresh Cloud VM and not using Ansible, see [my detailed Galaxy installation notes](https://github.com/muon-spectroscopy-computational-project/muon-galaxy/blob/eli/dev-documentation/muon_galaxy_dev_notes.md#installing-on-cloud-vm).
+If running on a fresh Cloud VM and not using Ansible, see [my detailed Galaxy installation notes](muon_galaxy_dev_notes.md#installing-on-cloud-vm).
 
 ## Ansible
 
