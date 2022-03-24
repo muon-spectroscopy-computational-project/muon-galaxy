@@ -39,11 +39,11 @@ const PLUGIN_BUILD_IDS = Array.prototype.concat(DIST_PLUGIN_BUILD_IDS, STATIC_PL
 const PATHS = {
     nodeModules: "./node_modules",
     pluginDirs: [
-        "../config/plugins/{visualizations,interactive_environments,welcome_page}/*/static/**/*",
-        "../config/plugins/{visualizations,interactive_environments,welcome_page}/*/*/static/**/*",
+        "../config/plugins/{muon_visualizations,visualizations,interactive_environments,welcome_page}/*/static/**/*",
+        "../config/plugins/{muon_visualizations,visualizations,interactive_environments,welcome_page}/*/*/static/**/*",
     ],
     pluginBuildModules: [
-        `../config/plugins/{visualizations,welcome_page}/{${PLUGIN_BUILD_IDS.join(",")}}/package.json`,
+        `../config/plugins/{muon_visualizations,visualizations,welcome_page}/{${PLUGIN_BUILD_IDS.join(",")}}/package.json`,
     ],
     stagedLibraries: {
         // This is a stepping stone towards having all this staged
