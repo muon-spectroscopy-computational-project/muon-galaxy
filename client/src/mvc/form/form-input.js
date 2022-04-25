@@ -22,8 +22,7 @@ export default Backbone.View.extend({
             }).set(options);
 
         // set element and link components
-        this.setElement(this._template());
-        this.$field = this.$(".ui-form-field");
+        this.setElement(this._template()); this.$field = this.$(".ui-form-field");
         this.$info = this.$(".ui-form-info");
         this.$preview = this.$(".ui-form-preview");
         this.$collapsible = this.$(".ui-form-collapsible");
@@ -35,6 +34,9 @@ export default Backbone.View.extend({
         this.$error_text = this.$(".ui-form-error-text");
         this.$error = this.$(".ui-form-error");
         this.$backdrop = this.$(".ui-form-backdrop");
+        this.$visualise = this.$(".ui-form-visualise");
+        this.$visualise_button = this.$(".ui-form-visualise-button");
+        this.$visualise_renderer = this.$(".ui-form-visualise-renderer");
 
         // add field element
         this.$field.prepend(this.field.$el);
@@ -82,6 +84,11 @@ export default Backbone.View.extend({
                 }
             });
         }
+
+        // add visualiser
+        this.$visualise_button.on("click", () => {
+            self.$visualise_renderer.text("hello world");
+        })
     },
 
     /** Set backdrop for input element */
@@ -174,10 +181,18 @@ export default Backbone.View.extend({
                 this.$connected_icon.hide();
             }
         } else {
-            this.$title_text.show().text(this.model.get("label"));
+            this.$title_text.show().text("bbb" + this.model.get("label"));
             this.$collapsible.hide();
         }
         this.$field.attr("data-label", this.model.get("label"));
+
+        //show viz button only in some cases
+        if (this.field.model.get("type") == "data" && this.field.model.get("extensions")[0] == "cell") {
+            this.$visualise_button.val("test btn");
+        }
+        else {
+            this.$visualise_button.hide();
+        }
     },
 
     _template: function () {
@@ -203,6 +218,12 @@ export default Backbone.View.extend({
             )
             .append($("<div/>").addClass("ui-form-field").append($("<div/>").addClass("ui-form-backdrop")))
             .append($("<div/>").addClass("ui-form-preview"))
-            .append($("<span/>").addClass("ui-form-info form-text text-muted mb-2"));
+            .append($("<span/>").addClass("ui-form-info form-text text-muted mb-2"))
+            .append(
+                $("<div/>")
+                    .addClass("ui-form-visualise")
+                    .append($("<button/>").addClass("ui-form-visualise-button"))
+                    .append($("<div/>").addClass("ui-form-visualise-renderer"))
+            );
     },
 });
