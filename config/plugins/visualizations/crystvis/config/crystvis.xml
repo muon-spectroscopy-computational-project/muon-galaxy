@@ -17,12 +17,13 @@
         <param type="dataset" var_name_in_template="hda" required="true">dataset_id</param>
     </params>
     <entry_point entry_point_type="chart" src="crystvis.js"/>
-    <specs>
+    <!-- Screenshot will not work until crystvis allows the WebGL renderer to preserve buffer -->
+    <!-- <specs>
         <exports>
             <exports>pdf</exports>
             <exports>png</exports>
         </exports>
-    </specs>
+    </specs> -->
     <settings>
         <input>
             <label>Atom Labels</label>
