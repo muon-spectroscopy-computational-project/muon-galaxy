@@ -7,8 +7,9 @@
             <model_class>HistoryDatasetAssociation</model_class>
             <test type="isinstance" test_attr="datatype" result_type="datatype">molecules.Cell</test>
             <test type="isinstance" test_attr="datatype" result_type="datatype">molecules.CIF</test>
-            <test type="isinstance" test_attr="datatype" result_type="datatype">molecules.XYZ</test>
-            <test type="isinstance" test_attr="datatype" result_type="datatype">molecules.PDB</test>
+            <!-- Bug in crystvis, cannot load XYZ format. magres requires new datatype in Galaxy -->
+            <!-- <test type="isinstance" test_attr="datatype" result_type="datatype">molecules.XYZ</test> -->
+            <!-- <test type="isinstance" test_attr="datatype" result_type="datatype">molecules.magres</test> -->
             <to_param param_attr="id">dataset_id</to_param>
         </data_source>
     </data_sources>
@@ -16,24 +17,257 @@
         <param type="dataset" var_name_in_template="hda" required="true">dataset_id</param>
     </params>
     <entry_point entry_point_type="chart" src="crystvis.js"/>
+    <!-- Screenshot will not work until crystvis allows the WebGL renderer to preserve buffer -->
+    <!-- <specs>
+        <exports>
+            <exports>pdf</exports>
+            <exports>png</exports>
+        </exports>
+    </specs> -->
     <settings>
         <input>
             <label>Atom Labels</label>
             <name>atom_labels</name>
             <help>Display the atomic symbol of each atom</help>
-            <type>select</type>
-            <display>radio</display>
-            <value>off</value>
-            <data>
+            <type>boolean</type>
+            <optional>true</optional>
+        </input>
+        <input>
+            <label>Load as Molecular Crystal</label>
+            <name>molecularCrystal</name>
+            <help>When loading, attempt to complete molecules across periodic boundries</help>
+            <type>boolean</type>
+            <optional>true</optional>
+        </input>
+        <input>
+            <label>van der Waals Radii Scale</label>
+            <name>vdwScaling</name>
+            <help>Rescale van der Waals radii by a constant factor</help>
+            <type>float</type>
+            <value>1.0</value>
+        </input>
+        <input>
+            <name>supercell</name>
+            <type>conditional</type>
+            <test_param>
+                <name>enabled</name>
+                <label>Supercell</label>
+                <type>boolean</type>
+                <optional>true</optional>
+                <help>Display as a supercell, with the size in each dimension given as an integer number of lattice vectors</help>
+            </test_param>
+            <cases>
+                <cases>
+                    <value>true</value>
+                    <inputs>
+                        <inputs>
+                            <label>X</label>
+                            <name>x</name>
+                            <type>integer</type>
+                            <value>1</value>
+                            <min>0</min>
+                        </inputs>
+                        <inputs>
+                            <label>Y</label>
+                            <name>y</name>
+                            <type>integer</type>
+                            <value>1</value>
+                            <min>0</min>
+                        </inputs>
+                        <inputs>
+                            <label>Z</label>
+                            <name>z</name>
+                            <type>integer</type>
+                            <value>1</value>
+                            <min>0</min>
+                        </inputs>
+                    </inputs>
+                </cases>
+            </cases>
+        </input>
+        <input>
+            <name>query</name>
+            <type>conditional</type>
+            <test_param>
+                <name>type</name>
+                <label>Query</label>
+                <type>select</type>
+                <value>all</value>
+                <help>Only display atoms matching the query, for details see https://stur86.github.io/crystvis-js/tutorial-Queries.html</help>
                 <data>
-                    <label>On</label>
-                    <value>on</value>
+                    <data>
+                        <value>all</value>
+                        <label>Show all</label>
+                    </data>
+                    <data>
+                        <value>indices</value>
+                        <label>Indices</label>
+                    </data>
+                    <data>
+                        <value>elements</value>
+                        <label>Elements</label>
+                    </data>
+                    <data>
+                        <value>cell</value>
+                        <label>Cell</label>
+                    </data>
+                    <data>
+                        <value>box</value>
+                        <label>Box</label>
+                    </data>
+                    <data>
+                        <value>sphere</value>
+                        <label>Sphere</label>
+                    </data>
+                    <data>
+                        <value>bonded</value>
+                        <label>Bonded</label>
+                    </data>
+                    <data>
+                        <value>molecule</value>
+                        <label>Molecule</label>
+                    </data>
+                    <data>
+                        <value>custom</value>
+                        <label>Custom</label>
+                    </data>
                 </data>
-                <data>
-                    <label>Off</label>
-                    <value>off</value>
-                </data>
-            </data>
+            </test_param>
+            <cases>
+                <cases>
+                    <value>all</value>
+                </cases>
+                <cases>
+                    <value>indices</value>
+                    <inputs>
+                        <inputs>
+                            <label>Indices</label>
+                            <name>indices</name>
+                            <type>text</type>
+                            <value>0</value>
+                            <help>One or more space separated atom indices to show</help>
+                        </inputs>
+                    </inputs>
+                </cases>
+                <cases>
+                    <value>elements</value>
+                    <inputs>
+                        <inputs>
+                            <label>Elements</label>
+                            <name>elements</name>
+                            <type>text</type>
+                            <value>H</value>
+                            <help>One or more space separated chemical symbols to show</help>
+                        </inputs>
+                    </inputs>
+                </cases>
+                <cases>
+                    <value>cell</value>
+                    <inputs>
+                        <inputs>
+                            <label>Cell</label>
+                            <name>cell</name>
+                            <type>text</type>
+                            <value>0 0 0</value>
+                            <help>Show all atoms within the unit cell with the provided indices, i j k indices should be space separated</help>
+                        </inputs>
+                    </inputs>
+                </cases>
+                <cases>
+                    <value>box</value>
+                    <inputs>
+                        <inputs>
+                            <label>Box Start</label>
+                            <name>box_start</name>
+                            <type>text</type>
+                            <value>0 0 0</value>
+                        </inputs>
+                        <inputs>
+                            <label>Box End</label>
+                            <name>box_end</name>
+                            <type>text</type>
+                            <value>1 1 1</value>
+                            <help>All atoms with co-ordinates between the start and end values will be displayed, co-ordinates should be space separated</help>
+                        </inputs>
+                    </inputs>
+                </cases>
+                <cases>
+                    <value>sphere</value>
+                    <inputs>
+                        <inputs>
+                            <label>Sphere Start</label>
+                            <name>sphere_start</name>
+                            <type>text</type>
+                            <value>0 0 0</value>
+                        </inputs>
+                        <inputs>
+                            <label>Sphere Radius</label>
+                            <name>sphere_radius</name>
+                            <type>float</type>
+                            <value>1.0</value>
+                            <min>0</min>
+                            <help>All atoms within radius of the start value will be displayed, co-ordinates should be space separated</help>
+                        </inputs>
+                    </inputs>
+                </cases>
+                <cases>
+                    <value>bonded</value>
+                    <inputs>
+                        <inputs>
+                            <label>Bonded Atoms</label>
+                            <name>bonded_atoms</name>
+                            <type>text</type>
+                            <value>0</value>
+                            <help>One or more space separated atom indices</help>
+                        </inputs>
+                        <inputs>
+                            <label>Distance</label>
+                            <name>bonded_distance</name>
+                            <type>integer</type>
+                            <value>1</value>
+                            <min>0</min>
+                            <help>Atoms within this many bonds of the previously specified atom(s) will be displayed</help>
+                        </inputs>
+                        <inputs>
+                            <label>Exact</label>
+                            <name>bonded_exact</name>
+                            <type>boolean</type>
+                            <optional>true</optional>
+                            <help>Instead of displaying atoms within the Distance, only display atoms exactly that many bonds distant</help>
+                        </inputs>
+                    </inputs>
+                </cases>
+                <cases>
+                    <value>molecule</value>
+                    <inputs>
+                        <inputs>
+                            <label>Molecule Atoms</label>
+                            <name>molecule_atoms</name>
+                            <type>text</type>
+                            <value>0</value>
+                            <help>One or more space separated atom indices, the molecule(s) containing these atoms will be displayed</help>
+                        </inputs>
+                    </inputs>
+                </cases>
+                <cases>
+                    <value>custom</value>
+                    <inputs>
+                        <inputs>
+                            <label>Custom Query</label>
+                            <name>custom_query</name>
+                            <type>text</type>
+                            <help>Correctly formatted JSON for building a complex, custom query</help>
+                        </inputs>
+                    </inputs>
+                </cases>
+            </cases>
+        </input>
+        <input>
+            <label>Exclude Query</label>
+            <name>exclude</name>
+            <type>boolean</type>
+            <optional>true</optional>
+            <help>Atoms matching the query will be excluded rather than included</help>
         </input>
     </settings>
 </visualization>
